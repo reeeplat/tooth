@@ -1,0 +1,24 @@
+name: t0703
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  go_router: ^13.0.1           # ✅ GoRouter 추가
+  provider: ^6.1.2             # ✅ MVVM ViewModel 바인딩용 Provider
+  http: ^0.13.6                # ✅ HTTP 패키지
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1        # ✅ 안정 린트
+
+flutter:
+  uses-material-design: true   # ✅ 올바른 위치
