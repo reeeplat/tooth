@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // TextInputFormatter를 위해 필요
-import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart'; // go_router 사용을 위해 추가
 
 // 실제 프로젝트에서는 provider 등의 상태 관리 라이브러리를 사용하여 이 ViewModel을 주입받습니다.
 // 여기서는 단순화를 위해 직접 인스턴스화합니다.
@@ -151,6 +151,10 @@ class _FindAccountScreenState extends State<FindAccountScreen>
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor, // 앱 테마 색상 사용
         foregroundColor: Colors.white, // 타이틀 색상 흰색
+        leading: IconButton( // EditProfileScreen과 동일한 뒤로가기 버튼 추가
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(), // 이전 화면으로 돌아가기 (go_router 사용)
+        ),
       ),
       body: Column(
         children: [
@@ -178,25 +182,43 @@ class _FindAccountScreenState extends State<FindAccountScreen>
     );
   }
 
-  // --- 중복 제거를 위한 헬퍼 위젯 및 메서드 시작 ---
-
-  /// 공통 TextFormField 위젯을 생성합니다.
-  Widget _buildCommonTextFormField({
-    required TextEditingController controller,
-    required String labelText,
-    required String hintText,
-    required String? Function(String?) validator,
-    TextInputType keyboardType = TextInputType.text, // 기본값 설정
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: labelText,
-        border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-        hintText: hintText,
+  // EditProfileScreen의 _buildTextField와 유사하게 통합된 헬퍼 위젯
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label, {
+        bool isPassword = false,
+        int? maxLength,
+        TextInputType? keyboardType,
+        ValueChanged<String>? onChanged,
+        List<TextInputFormatter>? inputFormatters,
+        bool readOnly = false,
+        InputDecoration? decoration, // decoration을 외부에서 받을 수 있도록 변경
+        FormFieldValidator<String>? validator,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8), // EditProfileScreen과 동일한 패딩
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        maxLength: maxLength,
+        keyboardType: keyboardType,
+        onChanged: onChanged,
+        inputFormatters: inputFormatters,
+        readOnly: readOnly,
+        decoration: decoration ?? InputDecoration( // 외부에서 decoration이 없으면 기본값 사용
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder( // EditProfileScreen과 동일한 포커스 효과
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+          ),
+          counterText: '', // maxLength 사용 시 숫자 표시 제거
+        ),
+        validator: validator,
       ),
-      validator: validator,
     );
   }
 
@@ -226,10 +248,10 @@ class _FindAccountScreenState extends State<FindAccountScreen>
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Colors.blueAccent, // EditProfileScreen 버튼 색상으로 변경
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // EditProfileScreen과 동일한 곡률
           ),
           child: Text(buttonText, style: const TextStyle(fontSize: 18)),
         ),
@@ -237,22 +259,20 @@ class _FindAccountScreenState extends State<FindAccountScreen>
     }
   }
 
-  // --- 중복 제거를 위한 헬퍼 위젯 및 메서드 끝 ---
-
   Widget _buildIdFinderTab() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(16), // EditProfileScreen과 동일한 패딩
       child: Form(
         key: _findIdFormKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
+        child: ListView( // Column 대신 ListView 사용하여 스크롤 가능하게 (더 유연함)
           children: [
-            _buildCommonTextFormField(
-              controller: _emailController,
-              labelText: '가입 시 이메일',
-              hintText: '예: example@email.com',
+            _buildTextField(
+              _emailController,
+              '가입 시 이메일',
+              hintText: '예: example@email.com', // _buildTextField 내부에서 hintText 처리 X, decoration을 직접 넘겨야 함
               keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator, // 공통 이메일 유효성 검사 사용
+              validator: _emailValidator,
             ),
             const SizedBox(height: 20),
             _buildLoadingButton(
@@ -269,18 +289,18 @@ class _FindAccountScreenState extends State<FindAccountScreen>
 
   Widget _buildPasswordFinderTab() {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(16), // EditProfileScreen과 동일한 패딩
       child: Form(
         key: _findPasswordFormKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
+        child: ListView( // Column 대신 ListView 사용하여 스크롤 가능하게 (더 유연함)
           children: [
-            _buildCommonTextFormField(
-              controller: _userIdController,
-              labelText: '아이디(이메일)',
-              hintText: '가입 시 사용한 아이디 또는 이메일',
-              keyboardType: TextInputType.emailAddress, // 아이디가 이메일 형식이라고 가정
-              validator: _emailValidator, // 공통 이메일 유효성 검사 사용
+            _buildTextField(
+              _userIdController,
+              '아이디(이메일)',
+              hintText: '가입 시 사용한 아이디 또는 이메일', // _buildTextField 내부에서 hintText 처리 X, decoration을 직접 넘겨야 함
+              keyboardType: TextInputType.emailAddress,
+              validator: _emailValidator,
             ),
             const SizedBox(height: 20),
             _buildLoadingButton(
