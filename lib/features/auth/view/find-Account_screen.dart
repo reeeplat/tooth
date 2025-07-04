@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // TextInputFormatter를 위해 필요
-import 'package:go_router/go_router.dart'; // go_router 사용을 위해 추가
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../auth/model/user.dart'; // User 모델 임포트
+import '../viewmodel/userinfo_viewmodel.dart';
 
 // 실제 프로젝트에서는 provider 등의 상태 관리 라이브러리를 사용하여 이 ViewModel을 주입받습니다.
 // 여기서는 단순화를 위해 직접 인스턴스화합니다.
