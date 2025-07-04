@@ -12,6 +12,7 @@ import '../features/diagnosis/view/result_screen.dart';
 import '../features/history/view/history_screen.dart';
 import '../features/diagnosis/view/realtime_prediction_screen.dart';
 import '../features/mypage/view/edit_profile_screen.dart';
+import '../features/auth/view/find-Account_screen.dart'; // FindAccountScreen 임포트 추가
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -29,6 +30,11 @@ class AppRouter {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      // ✅ 추가된 부분: FindAccountScreen에 대한 GoRoute 정의
+      GoRoute(
+        path: '/find-account', // 이 경로로 FindAccountScreen에 접근할 수 있습니다.
+        builder: (context, state) => const FindAccountScreen(),
       ),
 
       // ✅ ShellRoute: 하단 탭 바가 있는 화면들을 감싸는 역할
