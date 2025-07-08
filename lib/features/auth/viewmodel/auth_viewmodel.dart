@@ -83,6 +83,35 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 
+  /// 의사 로그인
+  /// 반환값: User 객체 (로그인 성공), String (오류 메시지)
+  Future<User?> doctorLogin(String email, String password) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$_baseUrl/auth/doctor_login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        return User.fromJson(data['user']);
+      } else {
+        final data = jsonDecode(res.body);
+        throw data['error'] ?? '알 수 없는 로그인 오류';
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('의사 로그인 중 네트워크 오류: $e');
+      }
+      if (e is String) {
+        throw e;
+      } else {
+        throw '서버와 연결할 수 없습니다. 네트워크 상태를 확인해주세요.';
+      }
+    }
+  }
+
   Future<String?> deleteUser(String userId, String password) async {
     try {
       final res = await http.delete(
@@ -105,3 +134,5 @@ class AuthViewModel with ChangeNotifier {
     }
   }
 }
+
+

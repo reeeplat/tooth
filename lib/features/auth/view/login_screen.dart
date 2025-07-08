@@ -1,5 +1,3 @@
-// C:\Users\sptzk\Desktop\t0703\lib\features\auth\view\login_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +5,9 @@ import '../viewmodel/auth_viewmodel.dart';
 import '../../mypage/viewmodel/userinfo_viewmodel.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String role;  // 역할 전달용 필드
+
+  const LoginScreen({Key? key, required this.role}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -78,6 +78,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final role = widget.role;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -197,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: () => context.go('/register'),
+                    onPressed: () => context.go('/register?role=$role'), // role 전달
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                       shape: RoundedRectangleBorder(
@@ -214,9 +216,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // 아이디/비밀번호 찾기 하나의 버튼
                   TextButton(
-                    onPressed: () => context.go('/find-account'),
+                    onPressed: () => context.go('/find-account?role=$role'), // role 전달
                     child: const Text(
                       '아이디/비밀번호 찾기',
                       style: TextStyle(color: Colors.blueAccent),
@@ -231,3 +232,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

@@ -1,91 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+// 인증 관련 화면
+import '../features/auth/view/RoleSelectionScreen.dart';
 import '../features/auth/view/login_screen.dart';
 import '../features/auth/view/register_screen.dart';
-import '../features/home/view/main_scaffold.dart'; // MainScaffold 임포트
-import '../features/home/view/home_screen.dart'; // HomeScreen 임포트 (MainScaffold의 자식으로 사용)
+import '../features/auth/view/find-Account_screen.dart';
+import '../features/auth/view/Doctorlogin.dart';
+
+// 홈 + 하단 탭 구조 관련
+import '../features/home/view/main_scaffold.dart';
+import '../features/home/view/home_screen.dart';
 import '../features/chatbot/view/chatbot_screen.dart';
 import '../features/mypage/view/mypage_screen.dart';
+import '../features/mypage/view/edit_profile_screen.dart';
+
+// 진단 관련
 import '../features/diagnosis/view/upload_screen.dart';
 import '../features/diagnosis/view/result_screen.dart';
-import '../features/history/view/history_screen.dart';
 import '../features/diagnosis/view/realtime_prediction_screen.dart';
-import '../features/mypage/view/edit_profile_screen.dart';
-import '../features/auth/view/find-Account_screen.dart'; // FindAccountScreen 임포트 추가
+import '../features/diagnosis/view/doctor_dashboard_screen.dart';
+
+// 진단 기록
+import '../features/history/view/history_screen.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _shellNavigatorKey = GlobalKey<NavigatorState>(); // ShellRoute를 위한 별도의 NavigatorKey
+  static final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
   static final router = GoRouter(
-    navigatorKey: _rootNavigatorKey, // 최상위 NavigatorKey
-    initialLocation: '/login', // 앱 시작 시 초기 경로
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/',
     routes: [
-      // 로그인 및 회원가입 화면 (하단 탭 바 없음)
+      // 역할 선택 화면
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const RoleSelectionScreen(),
+      ),
+      GoRoute(
+        path:'/role-selection',
+        builder: (context, state) => const RoleSelectionScreen(),
+      ),
+      
+      // 로그인
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
-      // ✅ 추가된 부분: FindAccountScreen에 대한 GoRoute 정의
-      GoRoute(
-        path: '/find-account', // 이 경로로 FindAccountScreen에 접근할 수 있습니다.
-        builder: (context, state) => const FindAccountScreen(),
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'] ?? 'user';
+          return LoginScreen(role: role);
+        },
       ),
 
-      // ✅ ShellRoute: 하단 탭 바가 있는 화면들을 감싸는 역할
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey, // ShellRoute는 자체 NavigatorKey를 가집니다.
-        builder: (context, state, child) {
-          // MainScaffold가 하단 탭 바를 제공하고, child는 현재 선택된 탭의 화면입니다.
-          // ✅ state.fullPath 대신 state.uri.toString() 사용
-          return MainScaffold(child: child, currentLocation: state.uri.toString());
+      // 의료진 로그인
+      GoRoute(
+        path: '/doctor-login',
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'] ?? 'doctor';
+          return DoctorLoginPage(role: role);
         },
+      ),
+
+      // 회원가입
+      GoRoute(
+        path: '/register',
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'] ?? 'user';
+          return RegisterScreen(role: role);
+        },
+      ),
+
+      // 아이디 찾기
+      GoRoute(
+        path: '/find-account',
+        builder: (context, state) {
+          final role = state.uri.queryParameters['role'] ?? 'user';
+          return FindAccountScreen(role: role);
+        },
+      ),
+
+      // 진단 실시간 분석
+      GoRoute(
+        path: '/diagnosis/realtime',
+        builder: (context, state) => const RealtimePredictionScreen(),
+      ),
+
+      // ✅ [추가] 의료진 대시보드
+      GoRoute(
+        path: '/doctor-dashboard',
+        builder: (context, state) => const DoctorDashboardScreen(),
+      ),
+
+      // 메인 앱 구조 (하단 네비게이션 포함)
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (context, state, child) => MainScaffold(
+          currentLocation: state.uri.toString(),
+          child: child,
+        ),
         routes: [
-          // MainScaffold 내부에 표시될 탭 화면들
           GoRoute(
-            path: '/home', // 홈 탭
+            path: '/home',
             builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
-            path: '/chatbot', // 챗봇 탭
+            path: '/chatbot',
             builder: (context, state) => const ChatbotScreen(),
           ),
           GoRoute(
-            path: '/mypage', // 마이페이지 탭
+            path: '/mypage',
             builder: (context, state) => const MyPageScreen(),
             routes: [
-              // 개인정보 수정 화면은 마이페이지 탭의 하위 라우트로 중첩
               GoRoute(
-                path: 'edit', // '/mypage/edit' 경로가 됨
+                path: 'edit',
                 builder: (context, state) => const EditProfileScreen(),
               ),
             ],
           ),
           GoRoute(
-            path: '/history', // 진단 기록 화면 (탭에서 접근 가능)
-            builder: (context, state) => const HistoryScreen(),
-          ),
-          GoRoute(
-            path: '/upload', // 사진 진단 업로드 화면 (탭에서 접근 가능)
+            path: '/upload',
             builder: (context, state) => const UploadScreen(),
           ),
           GoRoute(
-            path: '/result', // 진단 결과 화면 (탭에서 접근 가능)
+            path: '/result',
             builder: (context, state) => const ResultScreen(),
           ),
+          GoRoute(
+            path: '/history',
+            builder: (context, state) => const HistoryScreen(),
+          ),
         ],
-      ),
-
-      // ShellRoute 외부에 있는 화면 (하단 탭 바 없음)
-      // 예: 실시간 예측 화면 (전체 화면으로 표시)
-      GoRoute(
-        path: '/diagnosis/realtime',
-        builder: (context, state) => const RealtimePredictionScreen(),
       ),
     ],
   );
